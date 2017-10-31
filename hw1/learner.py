@@ -134,7 +134,8 @@ def train(data, epoch_num=100, batch_size=100, log_interval=1):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--train_data', type=str, default="data/hopper_data.pkl", help="train data file name, default to data/hopper_data.pkl")
+    parser.add_argument('--train_data', type=str, default="data/hopper_data.pkl", 
+                        help="train data file name, default to data/hopper_data.pkl")
 
     parser.add_argument('--epoch_num', type=int, default=1, 
                         help="num epochs to train, default to 1")

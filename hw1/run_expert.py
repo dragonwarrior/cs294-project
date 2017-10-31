@@ -26,6 +26,12 @@ def main():
     parser.add_argument("--max_timesteps", type=int)
     parser.add_argument('--num_rollouts', type=int, default=20,
                         help='Number of expert roll outs')
+    parser.add_argument('--gen_data', type=bool, default=False,
+                        help='generate train data')
+
+    parser.add_argument('--out_fname', type=str, default="data/hopper_data.pkl",
+                        help='file name for saving generated data')
+
     args = parser.parse_args()
 
     if args.envname == '':
@@ -67,7 +73,7 @@ def main():
                     break
             returns.append(totalr)
 
-        print('returns', returns)
+        #print('returns', returns)
         print('mean return', np.mean(returns))
         print('std of return', np.std(returns))
 
@@ -77,8 +83,8 @@ def main():
                        'std': np.std(returns)}
 
         #out_fname = "data/hopper_data_%d.pkl" % (args.num_rollouts)
-        out_fname = "data/hopper_data.pkl"
-        pickle.dump(expert_data, open(out_fname, "wb"))
+        if args.gen_data is True:
+            pickle.dump(expert_data, open(args.out_fname, "wb"))
 
 
 if __name__ == '__main__':
