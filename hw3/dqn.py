@@ -94,6 +94,7 @@ def learn(env,
     obs_t_ph              = tf.placeholder(tf.uint8, [None] + list(input_shape))
     # placeholder for current action
     act_t_ph              = tf.placeholder(tf.int32,   [None])
+
     # placeholder for current reward
     rew_t_ph              = tf.placeholder(tf.float32, [None])
     # placeholder for next observation (or state)
@@ -133,11 +134,21 @@ def learn(env,
     one_hot_mask = tf.one_hot(act_t_ph, depth=num_actions, dtype=tf.float32)
     q_act_t = tf.reduce_sum(q_v * one_hot_mask, axis=1)
 
-    q_v_tp1 = q_func(obs_tp1_float, num_actions, scope="target_q_func", reuse=False)
-    q_act_tp1 = tf.reduce_max(q_v_tp1, axis=1)
+    use_double_q = True 
+    if use_double_q is True:
+        print("using double Q-learning")
+        a_from_q = tf.argmax(q_func(obs_tp1_float, num_actions, scope="q_func", reuse=True), axis=1)
+        q_v_tp1 = q_func(obs_tp1_float, num_actions, scope="target_q_func", reuse=False)
+
+        mask = tf.one_hot(a_from_q, depth=num_actions, dtype=tf.float32)
+        q_act_tp1 = tf.reduce_sum(q_v_tp1 * mask, axis=1)
+    else:
+        q_v_tp1 = q_func(obs_tp1_float, num_actions, scope="target_q_func", reuse=False)
+        q_act_tp1 = tf.reduce_max(q_v_tp1, axis=1)
 
     target_q = rew_t_ph + gamma * (1 - done_mask_ph) * q_act_tp1
 
+    target_q = tf.stop_gradient(target_q)
     total_error = 0.5 * tf.reduce_mean(tf.square(q_act_t - target_q), axis=0)
 
     q_func_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='q_func')
@@ -228,8 +239,8 @@ def learn(env,
             rand_acts[action] += 1
         else:
             obs_t = replay_buffer.encode_recent_observation()
-            act = session.run([act_sy], feed_dict={obs_t_ph: obs_t[None, :])})
-            action = act[0].flatten()
+            act = session.run([act_sy], feed_dict={obs_t_ph: obs_t[None, :]})
+            action = act[0].flatten()[0]
             max_acts[action] += 1
 
         obs, reward, done, info = env.step(action)

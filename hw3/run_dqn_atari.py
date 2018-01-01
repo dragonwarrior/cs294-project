@@ -36,7 +36,7 @@ def atari_learn(env,
 
     lr_multiplier = 1.0
     lr_schedule = PiecewiseSchedule([
-                                         (0,                   1e-4 * lr_multiplier),
+                                         (0,                   1e-3 * lr_multiplier),
                                          (num_iterations / 10, 1e-4 * lr_multiplier),
                                          (num_iterations / 2,  5e-5 * lr_multiplier),
                                     ],
@@ -68,7 +68,7 @@ def atari_learn(env,
         exploration=exploration_schedule,
         stopping_criterion=stopping_criterion,
         replay_buffer_size=1000000,
-        batch_size=32,
+        batch_size=128,
         gamma=0.99,
         learning_starts=50000,
         learning_freq=4,
